@@ -17,6 +17,8 @@ const paymentSchema = new mongoose.Schema(
     platformFee: { type: Number, default: 0, min: 0 },
     netAmount: { type: Number, min: 0 },
     releasedAmount: { type: Number, default: 0, min: 0 },
+    releasedAmount: { type: Number, default: 0, min: 0 },
+    refundedAmount: { type: Number, default: 0, min: 0 }, // <-- ye nayi line
     currency: { type: String, default: "USD", uppercase: true },
 
     status: {

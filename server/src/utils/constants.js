@@ -35,3 +35,26 @@ export const PAYMENT_STATUS = {
   REFUNDED: "refunded",
   FAILED: "failed",
 };
+
+
+// ---- Step 5: order workflow ----
+
+// Kaun sa role kaunsa status transition kar sakta hai
+export const TRANSITION_ACTORS = {
+  "pending>in_progress": [ROLES.FREELANCER],
+  "pending>cancelled": [ROLES.CLIENT, ROLES.FREELANCER],
+  "in_progress>delivered": [ROLES.FREELANCER],
+  "in_progress>cancelled": [ROLES.FREELANCER],
+  "delivered>completed": [ROLES.CLIENT],
+  "delivered>revision_requested": [ROLES.CLIENT],
+  "revision_requested>delivered": [ROLES.FREELANCER],
+  "revision_requested>cancelled": [ROLES.FREELANCER],
+};
+
+// Har order ke default milestones (percent ka total 100 hai)
+export const DEFAULT_MILESTONES = [
+  { title: "Requirements & planning", description: "Requirements reviewed and the work plan agreed", percent: 20 },
+  { title: "First draft", description: "First working draft shared for feedback", percent: 30 },
+  { title: "Refinement", description: "Feedback applied and the work polished", percent: 30 },
+  { title: "Final delivery", description: "Final files and handoff delivered", percent: 20 },
+];

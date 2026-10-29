@@ -12,3 +12,17 @@ export const authLimiter = rateLimit({
     details: null,
   },
 });
+
+
+// Order place karne par limit (double-click aur spam se bachne ke liye)
+export const checkoutLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: "Too many orders placed. Please try again later.",
+    details: null,
+  },
+});

@@ -11,6 +11,8 @@ import freelancerRoutes from "./routes/freelancerRoutes.js";
 import portfolioRoutes from "./routes/portfolioRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
 import gigRoutes from "./routes/gigRoutes.js";
+import orderRoutes from "./routes/orderRoutes.js";
+import paymentRoutes from "./routes/paymentRoutes.js";
 
 const app = express();
 
@@ -47,6 +49,8 @@ app.use("/api/freelancers", freelancerRoutes);
 app.use("/api/portfolio", portfolioRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/gigs", gigRoutes);
+app.use("/api/orders", orderRoutes);
+app.use("/api/payments", paymentRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
