@@ -5,6 +5,12 @@ import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import rateLimit from "express-rate-limit";
 import { notFound, errorHandler } from "./middleware/errorHandler.js";
+import sanitizeInput from "./middleware/sanitize.js";
+import authRoutes from "./routes/authRoutes.js";
+import freelancerRoutes from "./routes/freelancerRoutes.js";
+import portfolioRoutes from "./routes/portfolioRoutes.js";
+import categoryRoutes from "./routes/categoryRoutes.js";
+import gigRoutes from "./routes/gigRoutes.js";
 
 const app = express();
 
@@ -18,9 +24,10 @@ app.use(
 app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use(sanitizeInput);
 if (process.env.NODE_ENV !== "production") app.use(morgan("dev"));
 
-// Poori API ke liye general rate limit (auth ke liye strict limit Step 3 me)
+// Poori API ke liye general rate limit
 app.use(
   "/api",
   rateLimit({
@@ -35,7 +42,11 @@ app.get("/api/health", (req, res) => {
   res.json({ success: true, message: "GigCraft API is running" });
 });
 
-// Routes yahan aage ke steps me mount honge
+app.use("/api/auth", authRoutes);
+app.use("/api/freelancers", freelancerRoutes);
+app.use("/api/portfolio", portfolioRoutes);
+app.use("/api/categories", categoryRoutes);
+app.use("/api/gigs", gigRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
