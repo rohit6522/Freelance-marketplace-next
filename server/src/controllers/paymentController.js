@@ -3,6 +3,8 @@ import asyncHandler from "../utils/asyncHandler.js";
 import { ROLES } from "../utils/constants.js";
 import { round2 } from "../utils/money.js";
 import { getPagination, buildMeta } from "../utils/pagination.js";
+import { getPaymentSummary } from "../services/paymentService.js";
+
 
 const partyField = (user) => (user.role === ROLES.FREELANCER ? "payee" : "payer");
 
@@ -28,34 +30,7 @@ export const listPayments = asyncHandler(async (req, res) => {
   res.json({ success: true, data: { payments, pagination: buildMeta(total, page, limit) } });
 });
 
-// GET /api/payments/summary   (earnings/spending ka total, dashboards me kaam aayega)
+// GET /api/payments/summary
 export const getSummary = asyncHandler(async (req, res) => {
-  const [row] = await Payment.aggregate([
-    { $match: { [partyField(req.user)]: req.user._id } },
-    {
-      $group: {
-        _id: null,
-        released: { $sum: "$releasedAmount" },
-        refunded: { $sum: "$refundedAmount" },
-        inEscrow: {
-          $sum: {
-            $cond: [{ $eq: ["$status", "held"] }, { $subtract: ["$amount", "$releasedAmount"] }, 0],
-          },
-        },
-        transactions: { $sum: 1 },
-      },
-    },
-  ]);
-
-  res.json({
-    success: true,
-    data: {
-      role: req.user.role,
-      released: round2(row?.released || 0), // freelancer ke liye earned, client ke liye paid
-      inEscrow: round2(row?.inEscrow || 0),
-      refunded: round2(row?.refunded || 0),
-      transactions: row?.transactions || 0,
-      isSimulated: true,
-    },
-  });
+  res.json({ success: true, data: await getPaymentSummary(req.user) });
 });

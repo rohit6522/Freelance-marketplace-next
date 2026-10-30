@@ -105,13 +105,12 @@ export const getGig = asyncHandler(async (req, res) => {
   if (!isOwner && gig.status === GIG_STATUS.PUBLISHED) {
     Gig.updateOne({ _id: gig._id }, { $inc: { views: 1 } }).catch(() => {});
   }
-
-  const [profile, stats] = await Promise.all([
-    FreelancerProfile.findOne({ user: gig.freelancer._id }).select(
-      "title bio skills languages experienceYears location timezone availability ratingAverage ratingCount"
-    ),
-    getFreelancerStats(gig.freelancer._id),
-  ]);
+const [profile, stats] = await Promise.all([
+  FreelancerProfile.findOne({ user: gig.freelancer._id }).select(
+    "title bio skills languages experienceYears location timezone availability ratingAverage ratingCount sellerTier completedOrders"
+  ),
+  getFreelancerStats(gig.freelancer._id),
+]);
 
   res.json({ success: true, data: { gig, seller: { profile, stats } } });
 });

@@ -13,6 +13,10 @@ import categoryRoutes from "./routes/categoryRoutes.js";
 import gigRoutes from "./routes/gigRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
+import reviewRoutes from "./routes/reviewRoutes.js";
+import favoriteRoutes from "./routes/favoriteRoutes.js";
+import conversationRoutes from "./routes/conversationRoutes.js";
+import dashboardRoutes from "./routes/dashboardRoutes.js";
 
 const app = express();
 
@@ -51,6 +55,10 @@ app.use("/api/categories", categoryRoutes);
 app.use("/api/gigs", gigRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/payments", paymentRoutes);
+app.use("/api/reviews", reviewRoutes);
+app.use("/api/favorites", favoriteRoutes);
+app.use("/api/conversations", conversationRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

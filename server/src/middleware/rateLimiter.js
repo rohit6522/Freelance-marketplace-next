@@ -26,3 +26,16 @@ export const checkoutLimiter = rateLimit({
     details: null,
   },
 });
+
+// Messages spam rokne ke liye
+export const messageLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 40,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: "You are sending messages too fast. Please slow down.",
+    details: null,
+  },
+});

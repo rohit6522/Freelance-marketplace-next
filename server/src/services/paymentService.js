@@ -1,6 +1,6 @@
 import Payment from "../models/Payment.js";
 import ApiError from "../utils/ApiError.js";
-import { PAYMENT_STATUS } from "../utils/constants.js";
+import { PAYMENT_STATUS, ROLES } from "../utils/constants.js";
 import { round2 } from "../utils/money.js";
 
 export const getPayment = async (orderId, session) => {
@@ -80,4 +80,35 @@ export const refundRemaining = async (orderId, session) => {
   payment.refundedAt = new Date();
   await payment.save({ session });
   return payment;
+};
+
+// Freelancer ke liye earned/in escrow, client ke liye paid/in escrow
+export const getPaymentSummary = async (user) => {
+  const field = user.role === ROLES.FREELANCER ? "payee" : "payer";
+
+  const [row] = await Payment.aggregate([
+    { $match: { [field]: user._id } },
+    {
+      $group: {
+        _id: null,
+        released: { $sum: "$releasedAmount" },
+        refunded: { $sum: "$refundedAmount" },
+        inEscrow: {
+          $sum: {
+            $cond: [{ $eq: ["$status", "held"] }, { $subtract: ["$amount", "$releasedAmount"] }, 0],
+          },
+        },
+        transactions: { $sum: 1 },
+      },
+    },
+  ]);
+
+  return {
+    role: user.role,
+    released: round2(row?.released || 0),
+    inEscrow: round2(row?.inEscrow || 0),
+    refunded: round2(row?.refunded || 0),
+    transactions: row?.transactions || 0,
+    isSimulated: true,
+  };
 };

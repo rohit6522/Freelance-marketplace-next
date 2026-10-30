@@ -1,11 +1,13 @@
 import Gig from "../models/Gig.js";
 import Category from "../models/Category.js";
 import FreelancerProfile from "../models/FreelancerProfile.js";
-import { GIG_STATUS } from "../utils/constants.js";
+import { GIG_STATUS, SELLER_TIERS } from "../utils/constants.js";
 import { escapeRegex } from "../utils/escapeRegex.js";
 import { getPagination, buildMeta } from "../utils/pagination.js";
+import { attachSellerInfo } from "./sellerService.js";
 
 const isObjectId = (value) => /^[a-f\d]{24}$/i.test(value);
+const VALID_TIERS = Object.values(SELLER_TIERS);
 
 const buildSort = (sort, hasText) => {
   switch (sort) {
@@ -25,7 +27,7 @@ const buildSort = (sort, hasText) => {
 };
 
 export const searchGigs = async (params = {}) => {
-  const { q, category, tags, minPrice, maxPrice, rating, delivery, experience, sort = "relevance" } = params;
+  const { q, category, tags, minPrice, maxPrice, rating, delivery, experience, tier, sort = "relevance" } = params;
   const { page, limit, skip } = getPagination(params);
   const empty = { gigs: [], pagination: buildMeta(0, page, limit) };
 
@@ -58,11 +60,27 @@ export const searchGigs = async (params = {}) => {
   // "Up to N days": gig ka sabse tez package N din ke andar ho
   if (delivery !== undefined) filter.minDeliveryDays = { $lte: delivery };
 
-  // Freelancer experience profile me hai, isliye pehle matching freelancers nikalte hain
+  // Freelancer-level filters (experience, tier). Dono ka intersection.
+  let allowed = null;
+  const restrictFreelancers = (ids) => {
+    const next = new Set(ids.map(String));
+    allowed = allowed ? new Set([...allowed].filter((id) => next.has(id))) : next;
+  };
+
   if (experience !== undefined) {
-    const ids = await FreelancerProfile.distinct("user", { experienceYears: { $gte: experience } });
-    filter.freelancer = { $in: ids };
+    restrictFreelancers(
+      await FreelancerProfile.distinct("user", { experienceYears: { $gte: experience } })
+    );
   }
+
+  if (tier) {
+    const list = tier.split(",").map((t) => t.trim()).filter((t) => VALID_TIERS.includes(t));
+    if (list.length) {
+      restrictFreelancers(await FreelancerProfile.distinct("user", { sellerTier: { $in: list } }));
+    }
+  }
+
+  if (allowed) filter.freelancer = { $in: [...allowed] };
 
   const [gigs, total] = await Promise.all([
     Gig.find(filter)
@@ -76,5 +94,5 @@ export const searchGigs = async (params = {}) => {
     Gig.countDocuments(filter),
   ]);
 
-  return { gigs, pagination: buildMeta(total, page, limit) };
+  return { gigs: await attachSellerInfo(gigs), pagination: buildMeta(total, page, limit) };
 };

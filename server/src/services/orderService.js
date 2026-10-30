@@ -11,13 +11,23 @@ import {
   ROLES,
 } from "../utils/constants.js";
 import { runInTransaction } from "../utils/transaction.js";
-import { splitAmount } from "../utils/money.js";
+import { splitAmount, formatMoney } from "../utils/money.js";
 import { escapeRegex } from "../utils/escapeRegex.js";
 import { getPagination, buildMeta } from "../utils/pagination.js";
 import * as paymentService from "./paymentService.js";
+import * as messageService from "./messageService.js";
+import { recomputeSellerStats } from "./sellerService.js";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const addDays = (date, days) => new Date(date.getTime() + days * DAY_MS);
+
+const STATUS_MESSAGES = {
+  [ORDER_STATUS.IN_PROGRESS]: "Order accepted. Work has started.",
+  [ORDER_STATUS.DELIVERED]: "Work delivered. Waiting for the client's review.",
+  [ORDER_STATUS.REVISION_REQUESTED]: "The client requested a revision.",
+  [ORDER_STATUS.COMPLETED]: "Order completed. Remaining demo escrow funds were released (simulated).",
+  [ORDER_STATUS.CANCELLED]: "Order cancelled. Unreleased demo escrow funds were refunded (simulated).",
+};
 
 const getRole = (order, user) => {
   if (order.client.equals(user._id)) return ROLES.CLIENT;
@@ -93,7 +103,12 @@ export const createOrder = async (client, { gigId, tier, requirements }) => {
       { session }
     );
 
-    await paymentService.createSimulatedPayment(order, session);
+      await paymentService.createSimulatedPayment(order, session);
+    await messageService.addOrderSystemMessage(
+      order,
+      `Order ${order.orderNumber} placed. Simulated payment of ${formatMoney(order.amount)} is held in demo escrow.`,
+      session
+    );
     return order;
   });
 };
@@ -187,6 +202,11 @@ export const changeStatus = ({ orderId, user, toStatus, payload = {}, allowedFro
     });
 
     await order.save({ session });
+
+    await messageService.addOrderSystemMessage(order, STATUS_MESSAGES[toStatus], session);
+    if (toStatus === ORDER_STATUS.COMPLETED) {
+      await recomputeSellerStats(order.freelancer, session);
+    }
     return order;
   });
 
@@ -243,10 +263,17 @@ export const releaseMilestone = ({ orderId, milestoneId, user }) =>
       throw new ApiError(409, "Funds for this milestone are already released");
     }
 
-    await paymentService.releaseFunds(order._id, milestone.amount, session);
+       await paymentService.releaseFunds(order._id, milestone.amount, session);
     milestone.releasedAt = new Date();
 
     await order.save({ session });
+
+    const number = order.milestones.findIndex((m) => m._id.equals(milestoneId)) + 1;
+    await messageService.addOrderSystemMessage(
+      order,
+      `Milestone ${number} funds (${formatMoney(milestone.amount)}) released from demo escrow (simulated).`,
+      session
+    );
     return order;
   });
 

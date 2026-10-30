@@ -13,3 +13,7 @@ export const splitAmount = (amount, percents) => {
     return cents / 100;
   });
 };
+
+export const round1 = (n) => Math.round((Number(n) + Number.EPSILON) * 10) / 10;
+
+export const formatMoney = (n) => `$${Number(n).toFixed(2)}`;

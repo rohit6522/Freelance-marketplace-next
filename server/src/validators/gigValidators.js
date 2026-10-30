@@ -58,6 +58,7 @@ export const searchGigRules = [
   query("rating").optional().isFloat({ min: 0, max: 5 }).toFloat(),
   query("delivery").optional().isInt({ min: 1, max: 90 }).toInt(),
   query("experience").optional().isInt({ min: 0, max: 60 }).toInt(),
+    query("tier").optional().isString().trim().isLength({ max: 100 }),
   query("sort").optional().isIn(["relevance", "newest", "price_asc", "price_desc", "rating"]),
   ...paging,
 ];

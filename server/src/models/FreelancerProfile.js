@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { SELLER_TIERS } from "../utils/constants.js";
 
 const languageSchema = new mongoose.Schema(
   {
@@ -68,6 +69,12 @@ const freelancerProfileSchema = new mongoose.Schema(
     // Review service (Step 6) isko stored reviews se recalculate karti hai.
     ratingAverage: { type: Number, default: 0, min: 0, max: 5 },
     ratingCount: { type: Number, default: 0, min: 0 },
+    completedOrders: { type: Number, default: 0, min: 0 },
+    sellerTier: {
+      type: String,
+      enum: Object.values(SELLER_TIERS),
+      default: SELLER_TIERS.RISING_TALENT,
+    },
   },
   { timestamps: true }
 );
@@ -75,5 +82,6 @@ const freelancerProfileSchema = new mongoose.Schema(
 freelancerProfileSchema.index({ skills: 1 });
 freelancerProfileSchema.index({ experienceYears: -1 });
 freelancerProfileSchema.index({ ratingAverage: -1 });
+freelancerProfileSchema.index({ sellerTier: 1 });
 
 export default mongoose.model("FreelancerProfile", freelancerProfileSchema);

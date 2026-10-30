@@ -58,3 +58,19 @@ export const DEFAULT_MILESTONES = [
   { title: "Refinement", description: "Feedback applied and the work polished", percent: 30 },
   { title: "Final delivery", description: "Final files and handoff delivered", percent: 20 },
 ];
+
+
+// ---- Step 6: seller tiers ----
+export const SELLER_TIERS = {
+  RISING_TALENT: "rising_talent",
+  LEVEL_2: "level_2",
+  PRO_VERIFIED: "pro_verified",
+  TOP_RATED: "top_rated",
+};
+
+// Upar se neeche check hota hai, pehla match jeetta hai. Thresholds yahan badal sakte ho.
+export const TIER_RULES = [
+  { tier: SELLER_TIERS.TOP_RATED, minCompleted: 10, minRating: 4.8 },
+  { tier: SELLER_TIERS.PRO_VERIFIED, minCompleted: 5, minRating: 4.5 },
+  { tier: SELLER_TIERS.LEVEL_2, minCompleted: 2, minRating: 4.0 },
+];
