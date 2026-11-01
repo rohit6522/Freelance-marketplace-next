@@ -39,3 +39,16 @@ export const messageLimiter = rateLimit({
     details: null,
   },
 });
+
+// Uploads par limit (Cloudinary quota aur abuse se bachne ke liye)
+export const uploadLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: "Too many uploads. Please try again later.",
+    details: null,
+  },
+});

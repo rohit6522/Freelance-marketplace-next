@@ -24,7 +24,7 @@ export const listPayments = asyncHandler(async (req, res) => {
       .skip(skip)
       .limit(limit)
       .lean(),
-    Payment.countDocuments(filter),
+    Payment.countDocuments(filter), 
   ]);
 
   res.json({ success: true, data: { payments, pagination: buildMeta(total, page, limit) } });

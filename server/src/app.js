@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 import rateLimit from "express-rate-limit";
 import { notFound, errorHandler } from "./middleware/errorHandler.js";
 import sanitizeInput from "./middleware/sanitize.js";
+import { mediaGuard } from "./middleware/mediaGuard.js";
 import authRoutes from "./routes/authRoutes.js";
 import freelancerRoutes from "./routes/freelancerRoutes.js";
 import portfolioRoutes from "./routes/portfolioRoutes.js";
@@ -17,6 +18,7 @@ import reviewRoutes from "./routes/reviewRoutes.js";
 import favoriteRoutes from "./routes/favoriteRoutes.js";
 import conversationRoutes from "./routes/conversationRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
+import uploadRoutes from "./routes/uploadRoutes.js";
 
 const app = express();
 
@@ -31,6 +33,7 @@ app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(sanitizeInput);
+app.use(mediaGuard);
 if (process.env.NODE_ENV !== "production") app.use(morgan("dev"));
 
 // Poori API ke liye general rate limit
@@ -59,6 +62,7 @@ app.use("/api/reviews", reviewRoutes);
 app.use("/api/favorites", favoriteRoutes);
 app.use("/api/conversations", conversationRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/uploads", uploadRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
