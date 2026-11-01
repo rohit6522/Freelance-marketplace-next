@@ -21,6 +21,7 @@ import dashboardRoutes from "./routes/dashboardRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 
 const app = express();
+app.set("trust proxy", 1); // Next.js proxy ke peeche real client IP ke liye (rate limiting)
 
 app.use(helmet());
 app.use(
