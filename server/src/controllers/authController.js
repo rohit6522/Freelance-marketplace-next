@@ -4,19 +4,43 @@ import FreelancerProfile from "../models/FreelancerProfile.js";
 import ApiError from "../utils/ApiError.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { ROLES } from "../utils/constants.js";
+import { FOCUS_AREAS } from "../utils/focusAreas.js";
+import { runInTransaction } from "../utils/transaction.js";
 import { sendTokenCookie, clearTokenCookie } from "../utils/token.js";
 import { sendPasswordResetEmail } from "../services/emailService.js";
 
 // POST /api/auth/register
 export const register = asyncHandler(async (req, res) => {
   // Sirf allowed fields lete hain (role "admin" jaisi cheez bheji bhi jaye to nahi chalegi)
-  const { name, email, password, role, companyName, country } = req.body;
+  const { name, email, password, role, companyName, country, primaryFocus, marketingOptIn } = req.body;
 
-  const user = await User.create({ name, email, password, role, companyName, country });
+  const user = await runInTransaction(async (session) => {
+    const [created] = await User.create(
+      [
+        {
+          name,
+          email,
+          password,
+          role,
+          companyName,
+          country,
+          primaryFocus: primaryFocus || undefined,
+          marketingOptIn: Boolean(marketingOptIn),
+          termsAcceptedAt: new Date(),
+        },
+      ],
+      { session }
+    );
 
-  if (user.role === ROLES.FREELANCER) {
-    await FreelancerProfile.create({ user: user._id });
-  }
+    if (created.role === ROLES.FREELANCER) {
+      const focus = FOCUS_AREAS[primaryFocus];
+      await FreelancerProfile.create(
+        [{ user: created._id, ...(focus ? { title: focus.title, skills: focus.skills } : {}) }],
+        { session }
+      );
+    }
+    return created;
+  });
 
   sendTokenCookie(res, user._id, true);
   res.status(201).json({

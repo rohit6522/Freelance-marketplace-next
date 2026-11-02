@@ -1,5 +1,6 @@
 import { body, param } from "express-validator";
 import { ROLES } from "../utils/constants.js";
+import { FOCUS_KEYS } from "../utils/focusAreas.js";
 
 const emailRule = (field = "email") =>
   body(field)
@@ -27,6 +28,16 @@ export const registerRules = [
     .isIn(Object.values(ROLES)).withMessage("Role must be client or freelancer"),
   body("companyName").optional().isString().trim().isLength({ max: 100 }),
   body("country").optional().isString().trim().isLength({ max: 60 }),
+  body("primaryFocus")
+    .optional({ values: "falsy" })
+    .isIn(FOCUS_KEYS).withMessage("Please choose a valid focus area"),
+  body("marketingOptIn")
+    .optional()
+    .isBoolean().withMessage("marketingOptIn must be true or false")
+    .toBoolean(),
+  body("acceptTerms")
+    .custom((value) => value === true || value === "true")
+    .withMessage("You must accept the terms to create an account"),
 ];
 
 export const loginRules = [

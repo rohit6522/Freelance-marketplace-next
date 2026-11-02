@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { ROLES } from "../utils/constants.js";
 import { imageSchema } from "./sharedSchemas.js";
+import { FOCUS_KEYS } from "../utils/focusAreas.js";
 
 const userSchema = new mongoose.Schema(
   {
@@ -39,6 +40,9 @@ const userSchema = new mongoose.Schema(
     companyName: { type: String, trim: true, maxlength: 100 }, // clients ke liye
     country: { type: String, trim: true, maxlength: 60 },
     isActive: { type: Boolean, default: true },
+    primaryFocus: { type: String, enum: FOCUS_KEYS },
+    marketingOptIn: { type: Boolean, default: false },
+    termsAcceptedAt: Date,
 
     passwordChangedAt: Date,
     passwordResetToken: { type: String, select: false },

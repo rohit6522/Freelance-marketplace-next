@@ -19,6 +19,7 @@ import favoriteRoutes from "./routes/favoriteRoutes.js";
 import conversationRoutes from "./routes/conversationRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
+import statsRoutes from "./routes/statsRoutes.js";
 
 const app = express();
 app.set("trust proxy", 1); // Next.js proxy ke peeche real client IP ke liye (rate limiting)
@@ -64,6 +65,7 @@ app.use("/api/favorites", favoriteRoutes);
 app.use("/api/conversations", conversationRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/uploads", uploadRoutes);
+app.use("/api/stats", statsRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
