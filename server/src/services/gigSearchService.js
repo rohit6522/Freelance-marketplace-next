@@ -35,11 +35,21 @@ export const searchGigs = async (params = {}) => {
 
   if (q) filter.$text = { $search: q };
 
+  // category: ek ya zyada slugs/ids comma se alag kiye hue ("graphics-design,web-development")
   if (category) {
-    const match = isObjectId(category) ? { _id: category } : { slug: category.toLowerCase() };
-    const found = await Category.findOne({ ...match, isActive: true }).select("_id");
-    if (!found) return empty;
-    filter.category = found._id;
+    const items = category.split(",").map((c) => c.trim().toLowerCase()).filter(Boolean).slice(0, 8);
+    const ids = items.filter(isObjectId);
+    const slugs = items.filter((c) => !isObjectId(c));
+
+    const found = await Category.find({
+      isActive: true,
+      $or: [{ _id: { $in: ids } }, { slug: { $in: slugs } }],
+    })
+      .select("_id")
+      .lean();
+
+    if (!found.length) return empty;
+    filter.category = { $in: found.map((c) => c._id) };
   }
 
   if (tags) {

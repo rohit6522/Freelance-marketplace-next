@@ -51,7 +51,7 @@ const paging = [
 // Public search. Frontend khaali params (jaise ?q=) bhejne ke bajay unhe omit kare.
 export const searchGigRules = [
   query("q").optional().isString().trim().isLength({ max: 100 }),
-  query("category").optional().isString().trim().isLength({ max: 60 }),
+  query("category").optional().isString().trim().isLength({ max: 300 }),
   query("tags").optional().isString().trim().isLength({ max: 200 }),
   query("minPrice").optional().isFloat({ min: 0 }).toFloat(),
   query("maxPrice").optional().isFloat({ min: 0 }).toFloat(),
