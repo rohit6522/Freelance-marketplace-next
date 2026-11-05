@@ -25,7 +25,8 @@ export const getPublicProfile = asyncHandler(async (req, res) => {
     FreelancerProfile.findOne({ user: id }),
     PortfolioProject.find({ freelancer: id }).sort({ displayOrder: 1, createdAt: -1 }),
     Gig.find({ freelancer: id, status: GIG_STATUS.PUBLISHED })
-      .select("-description -faqs -deliverables")
+      .select("-faqs -deliverables")
+
       .populate("category", "name slug")
       .sort({ createdAt: -1 })
       .limit(12),

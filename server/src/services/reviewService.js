@@ -79,7 +79,8 @@ export const listReviews = async (params = {}) => {
   const [reviews, total, grouped] = await Promise.all([
     Review.find(filter)
       .select("-reports") // reporters ki info public nahi hoti
-      .populate("client", "name avatar country")
+      .populate("client", "name avatar country companyName")
+
       .populate("gig", "title slug")
       .populate("order", "selectedPackage.tier amount completedAt")
       .sort(SORTS[sort] || SORTS.recent)
