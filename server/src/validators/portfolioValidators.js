@@ -9,7 +9,7 @@ const rules = (isCreate) => {
     body("images").optional().isArray({ max: 6 }).withMessage("At most 6 images"),
     body("images.*.url").isURL({ protocols: ["http", "https"], require_protocol: true }).withMessage("Image url must be a valid http(s) URL"),
     body("images.*.publicId").optional().isString(),
-    body("externalLink").optional().isURL({ protocols: ["http", "https"], require_protocol: true }).withMessage("Link must be a valid http(s) URL"),
+    body("externalLink").optional({ values: "falsy" }).isURL({ protocols: ["http", "https"], require_protocol: true }).withMessage("Link must be a valid http(s) URL"),
     body("category").optional().isString().trim().isLength({ max: 60 }),
     body("highlightMetric").optional().isString().trim().isLength({ max: 80 }),
     body("duration").optional().isString().trim().isLength({ max: 40 }),

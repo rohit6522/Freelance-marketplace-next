@@ -24,14 +24,38 @@ export const uploadFiles = (files) => {
   return api.post("/uploads/files", form);
 };
 
+/* ------------------------------ Images ------------------------------ */
+
+const IMAGE_EXTENSIONS = [".jpg", ".jpeg", ".png", ".webp"];
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+
+export function validateImages(picked, existingCount, max) {
+  if (existingCount + picked.length > max) return `You can add at most ${max} images.`;
+  if (picked.length > 5) return "Upload at most 5 images at a time.";
+
+  for (const file of picked) {
+    const ext = file.name.slice(file.name.lastIndexOf(".")).toLowerCase();
+    if (!IMAGE_EXTENSIONS.includes(ext)) return `${file.name}: only JPG, PNG and WebP images are allowed.`;
+    if (file.size > MAX_IMAGE_BYTES) return `${file.name} is larger than 5 MB.`;
+  }
+  return null;
+}
+
+export const uploadImages = (files) => {
+  const form = new FormData();
+  for (const file of files) form.append("files", file);
+  return api.post("/uploads/images", form);
+};
+
+export const deleteUpload = (publicId) => api.delete("/uploads", { publicId });
+
 /* ------------------------------ Avatar ------------------------------ */
 
-const AVATAR_EXTENSIONS = [".jpg", ".jpeg", ".png", ".webp"];
 const MAX_AVATAR_BYTES = 2 * 1024 * 1024;
 
 export function validateAvatar(file) {
   const ext = file.name.slice(file.name.lastIndexOf(".")).toLowerCase();
-  if (!AVATAR_EXTENSIONS.includes(ext)) return "Profile photo must be a JPG, PNG or WebP image.";
+  if (!IMAGE_EXTENSIONS.includes(ext)) return "Profile photo must be a JPG, PNG or WebP image.";
   if (file.size > MAX_AVATAR_BYTES) return "Profile photo must be 2 MB or smaller.";
   return null;
 }
